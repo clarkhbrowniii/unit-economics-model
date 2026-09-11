@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.env
+.vscode/
+.idea/
+build/
+dist/
+*.egg-info/
+.DS_Store
+Thumbs.db
+Desktop.ini
