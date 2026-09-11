@@ -1,6 +1,7 @@
 """Monthly unit economics model. Run with: python model.py."""
 
 import math
+import re
 import tkinter as tk
 from tkinter import messagebox, ttk
 
@@ -63,14 +64,31 @@ def calculate_contribution_margin(
     return (arpu * gross_margin) - (cac / lifetime)
 
 
+def parse_input(value: object, key: str, label: str) -> float:
+    """Parse US dollar amounts, percentages, and comma-grouped numbers."""
+    text = str(value).strip()
+    # Commas must separate groups of three; never silently turn 1,5 into 15.
+    unsigned = r"(?:[0-9]{1,3}(?:,[0-9]{3})+|[0-9]+)(?:\.[0-9]*)?|\.[0-9]+"
+    number = rf"[+-]?(?:{unsigned})(?:[eE][+-]?[0-9]+)?"
+    if key in ("marketing_spend", "revenue"):
+        pattern = rf"(?:\$\s*{number}|[+-]\s*\$\s*(?:{unsigned})|{number})"
+        example = "Enter a dollar amount such as 24000 or $24,000.00."
+    elif key == "gross_margin_percent":
+        pattern = rf"{number}\s*%?"
+        example = "Enter a percentage such as 80 or 80%."
+    else:
+        pattern = number
+        example = "Enter a count such as 1000 or 1,000.5, without $ or %."
+    if re.fullmatch(pattern, text) is None:
+        raise ValueError(f"{label} has an invalid numeric format. {example}")
+    return float(re.sub(r"[$%,\s]", "", text))
+
+
 def validate_inputs(raw_inputs: dict) -> dict:
     """Parse finite numeric inputs and reject invalid model denominators."""
     values = {}
     for key, label, _unit in INPUT_FIELDS:
-        try:
-            value = float(raw_inputs[key])
-        except (ValueError, TypeError, KeyError):
-            raise ValueError(f"{label} must be numeric.") from None
+        value = parse_input(raw_inputs.get(key), key, label)
         if not math.isfinite(value):
             raise ValueError(f"{label} must be a finite number.")
         if value < 0:
