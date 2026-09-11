@@ -131,8 +131,8 @@ def run_model(
     results["lifetime_capped"] = churn < 1.0 / LIFETIME_CAP
     # Chart data belongs to the model layer, so charts only render results.
     results["monthly_gross_profit"] = arpu * gross_margin
-    results["timeline_months"] = [0.0, lifetime]
-    results["cumulative_gross_profit"] = [0.0, ltv]
+    results["timeline_months"] = [0.0, lifetime] #type: ignore
+    results["cumulative_gross_profit"] = [0.0, ltv] #type: ignore
     results["payback_within_lifetime"] = (
         results["payback"] <= lifetime
         or math.isclose(results["payback"], lifetime, rel_tol=1e-12)
@@ -140,13 +140,13 @@ def run_model(
     ratio = results["ratio"]
     # Ignore floating-point roundoff at the course's category boundaries.
     if ratio < 1 and not math.isclose(ratio, 1, rel_tol=1e-12):
-        results["health"] = "Value Destructive"
+        results["health"] = "Value Destructive" #type: ignore
     elif ratio < 3 and not math.isclose(ratio, 3, rel_tol=1e-12):
-        results["health"] = "Growing, Not Earning"
+        results["health"] = "Growing, Not Earning" #type: ignore
     elif ratio <= 5 or math.isclose(ratio, 5, rel_tol=1e-12):
-        results["health"] = "Healthy"
+        results["health"] = "Healthy" #type: ignore
     else:
-        results["health"] = "Potentially Underinvesting in Growth"
+        results["health"] = "Potentially Underinvesting in Growth" #type: ignore
     return results
 
 
